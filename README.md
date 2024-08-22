@@ -3,6 +3,7 @@ This project involves the workflow process for a call classification using Tempo
 
 #Setup 
 1) Start the temporal server using - $temporal server start-dev
+   
 2)To start the Worker, run this command from the project root: $python run_worker.py
 
 Note - You won't see any output right away, but leave the program running.
