@@ -1,5 +1,6 @@
 # Brocolliai_assignment
-This project involves the workflow process for a call classification using Temporal, Openai, supabase. 
+This project involves the workflow process for a call classification using Temporal, Openai, supabase for the following problem statement :
+https://docs.google.com/document/d/17F18hjPfEt7KiSwzIiUfiM3F_VLPl65yH5niNZTZ3lc/edit
 
 #Setup 
 1) Start the temporal server using - $temporal server start-dev
