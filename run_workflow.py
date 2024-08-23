@@ -1,10 +1,24 @@
 # @@@SNIPSTART python-project-template-run-workflow
 import asyncio
 import traceback
+import random
+import string
 
 from temporalio.client import Client, WorkflowFailureError
 
 from workflows import CallProcessing
+from shared import TranscriptData
+
+
+def random_id_generator():
+    length=10
+    # Define the characters to use for the ID
+    characters = string.ascii_letters + string.digits
+    # Generate a random alphanumeric string
+    random_id = ''.join(random.choice(characters) for _ in range(length))
+    return random_id
+
+
 
 async def main() -> None:
     # Create client connected to server at the given address
@@ -49,13 +63,17 @@ Agent: Perfect! Is there anything else you'd like to share or any other question
 User: No. That's it.
 Agent: Thank you for calling Armstrong Plumbing. Hope you have a great day!'''
 
-    workflow_id: str = 'abc123'
+   
+    data: TranscriptData = TranscriptData(
+        transcript= InputTranscript,
+        workflow_id = random_id_generator(),
+    )
 
     try:
         result = await client.execute_workflow(
             CallProcessing.run,
-            InputTranscript,
-            id=workflow_id,
+            data,
+            id=data.workflow_id,
             task_queue='call_processing_queue',
         )
 

@@ -8,46 +8,50 @@ with workflow.unsafe.imports_passed_through():
 
 ##todo take input as an object which has 2 things workflowid and transcript instead of just sending transcript as str
 
-
+from shared import TranscriptData
 
 @workflow.defn
 class CallProcessing:
     @workflow.run
-    async def run(self, transcript: str) ->  Dict[str, str]:
+    async def run(self, transcript_data: TranscriptData) ->  Dict[str, str]:
+
+        params = ("WORKFLOW_STARTED", transcript_data.workflow_id)
 
         await workflow.execute_activity(
             update_workflow_state,
-            # workflow_id
-            "WORKFLOW_STARTED",
+            params,
             start_to_close_timeout=timedelta(seconds=10)
         )
 
         #Classification [Emergency, Regular Job, Cancel Service, Note down msg, Other]
         classification = await workflow.execute_activity(
             classify_call,
-            transcript,
+            transcript_data.transcript,
             start_to_close_timeout=timedelta(seconds=10)
         )
 
+        params = ("CALL_CLASSIFICATION_COMPLETED", transcript_data.workflow_id)
+
         await workflow.execute_activity(
             update_workflow_state,
-            # workflow_id,
-            "CALL_CLASSIFICATION_COMPLETED",
+            params,
             start_to_close_timeout=timedelta(seconds=10)
         )
 
         #Flag the call if necessary [Verbal loop, incomplete call, Hallucinate, Reading prompt, None]
         flagged = await workflow.execute_activity(
             flag_call,
-            transcript,
+            transcript_data.transcript,
             start_to_close_timeout=timedelta(seconds=10)
         )
+
+        params= ("CALL_FLAGGING_COMPLETED", transcript_data.workflow_id)
+
 
          # Update state: CALL_FLAGGING_COMPLETED
         await workflow.execute_activity(
             update_workflow_state,
-            # workflow_id,
-            "CALL_FLAGGING_COMPLETED",
+            params,
             start_to_close_timeout=timedelta(seconds=10)
         )
 
@@ -55,14 +59,16 @@ class CallProcessing:
         #Tag the call for customers [Job booked, Spam, Estimate required, Empty call , Callback required]
         tag = await workflow.execute_activity(
             tagging_classification,
-            transcript,
+            transcript_data.transcript,
             start_to_close_timeout=timedelta(seconds=10)
         )
 
+        params= ("CALL_TAGGING_COMPLETED", transcript_data.workflow_id)
+
+
         await workflow.execute_activity(
             update_workflow_state,
-            # workflow_id,
-            "CALL_TAGGING_COMPLETED",
+            params,
             start_to_close_timeout=timedelta(seconds=10)
         )
 
